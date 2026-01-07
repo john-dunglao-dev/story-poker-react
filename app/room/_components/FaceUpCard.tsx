@@ -1,6 +1,6 @@
 export default async function FaceUpCard() {
   return (
-    <div className="relative w-75 h-105 bg-linear-to-br from-indigo-500 via-purple-500 to-purple-700 rounded-3xl shadow-2xl flex flex-col justify-center items-center border-4 border-white p-2">
+    <div className="text-black relative w-75 h-105 bg-linear-to-br from-indigo-500 via-purple-500 to-purple-700 rounded-3xl shadow-2xl flex flex-col justify-center items-center border-4 border-white p-2">
       <div className="bg-white border border-transparent rounded-xl w-full h-full relative">
         {/* Inner border decoration */}
         <div className="absolute inset-5 border border-black/20 rounded-2xl pointer-events-none"></div>
@@ -20,6 +20,7 @@ export default async function FaceUpCard() {
           <img
             src="/logo-v2-mini.drawio.svg"
             alt="John Florentino Dunglao Logo"
+            className="fill-black"
           />
         </div>
       </div>
