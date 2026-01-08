@@ -1,5 +1,4 @@
-import FaceDownCard from '../_components/FaceDownCard';
-import FaceUpCard from '../_components/FaceUpCard';
+import Room from '../_components/Room';
 
 export default async function InsideRoomPage({
   params,
@@ -9,15 +8,9 @@ export default async function InsideRoomPage({
   const { slug } = await params;
 
   return (
-    <div>
-      <div>Inside Room Page: {slug}</div>
-
-      <div>
-        <FaceDownCard />
-      </div>
-
-      <div>
-        <FaceUpCard />
+    <div className="min-h-screen bg-white p-4">
+      <div className="container mx-auto">
+        <Room slug={slug} />
       </div>
     </div>
   );
