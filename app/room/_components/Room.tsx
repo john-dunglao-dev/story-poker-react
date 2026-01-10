@@ -1,11 +1,15 @@
 'use client';
 
+import CardSelection from './states/CardSelection';
+import { Card } from './_models/Card';
 import { useState } from 'react';
-import Card from './cards/Card';
+import { RoomState } from './_models/Room';
+import RoomJoin from './states/RoomJoin';
+import CardReveal from './states/CardReveal';
 
 export default function Room({ slug }: { slug: string }) {
   // Story poker card values
-  const cardValues = [
+  const cardValues: Card[] = [
     { type: 'number', points: 0 },
     { type: 'number', points: 1 },
     { type: 'number', points: 2 },
@@ -27,10 +31,27 @@ export default function Room({ slug }: { slug: string }) {
     { id: 5, name: 'Charlie Brown', hasVoted: false },
   ];
 
-  const [isRevealed, setIsRevealed] = useState(false);
+  const [roomState, setRoomState] = useState<RoomState>('joining');
+  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
 
-  const handleRevealCards = (reveal: boolean) => {
-    setIsRevealed(reveal);
+  const handleRevealCards = () => {
+    console.log('Revealing cards..');
+    setRoomState('result');
+  };
+
+  const handleResetSelections = () => {
+    console.log('Resetting selections..');
+    setSelectedCard(null);
+    setRoomState('in-session');
+  };
+
+  const handleSelectCard = (card: Card) => {
+    setSelectedCard(card);
+  };
+
+  const handleJoinRoom = (slug: string, name: string) => {
+    console.log(`Joining room ${slug} as ${name}`);
+    setRoomState('in-session');
   };
 
   return (
@@ -78,49 +99,21 @@ export default function Room({ slug }: { slug: string }) {
           </div>
         </div>
 
-        {/* Center - Cards Selection */}
         <div className="flex-1">
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 shadow-lg">
-            <h2 className="text-gray-900 text-xl font-bold mb-6 text-center">
-              Select Your Card
-            </h2>
-
-            {/* Current Story */}
-            <div className="bg-white rounded-lg p-4 mb-6 border border-gray-200">
-              <h3 className="text-gray-900 font-semibold mb-2">
-                Current Story:
-              </h3>
-              <p className="text-gray-600 text-sm">
-                As a user, I want to be able to select a story point value so
-                that I can participate in the estimation.
-              </p>
-            </div>
-
-            {/* Cards Grid */}
-            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-5 gap-4 justify-items-center">
-              {cardValues.map((value) => (
-                <button
-                  key={value.points}
-                  className="transform hover:scale-110 transition-transform duration-200 hover:-translate-y-2 focus:outline-none focus:ring-4 focus:ring-purple-500 rounded-2xl cursor-pointer"
-                  onClick={() => console.log(`Selected: ${value}`)}
-                >
-                  <Card value={value} reveal={isRevealed} />
-                </button>
-              ))}
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 mt-8 justify-center">
-              <button
-                className="px-6 py-3 bg-linear-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-lg hover:from-purple-600 hover:to-indigo-700 transition-all shadow-lg"
-                onClick={() => handleRevealCards(!isRevealed)}
-              >
-                Reveal All Cards
-              </button>
-              <button className="px-6 py-3 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-all border-2 border-gray-300">
-                Reset Votes
-              </button>
-            </div>
+            {roomState === 'joining' ? (
+              <RoomJoin slug={slug} onJoinRoom={handleJoinRoom} />
+            ) : roomState === 'in-session' ? (
+              <CardSelection
+                cards={cardValues}
+                selected={selectedCard}
+                onResetSelections={handleResetSelections}
+                onRevealCards={handleRevealCards}
+                onSelectCard={handleSelectCard}
+              />
+            ) : (
+              <CardReveal onReset={handleResetSelections} />
+            )}
           </div>
         </div>
       </div>

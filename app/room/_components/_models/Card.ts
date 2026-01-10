@@ -1,9 +1,9 @@
-export interface CardValue {
+export interface Card {
   type: 'image' | 'number' | 'string';
   points: string | number;
 }
 
 export interface CardProps {
-  value?: CardValue;
+  value?: Card;
   reveal?: boolean;
 }

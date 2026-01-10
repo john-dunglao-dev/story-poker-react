@@ -1,6 +1,6 @@
-import { CardValue } from './_models/Card';
+import { Card } from '../_models/Card';
 
-const defaultValue: CardValue = {
+const defaultValue: Card = {
   type: 'string',
   points: '?',
 };
@@ -8,7 +8,7 @@ const defaultValue: CardValue = {
 export default function FaceUpCard({
   type,
   points,
-}: Partial<CardValue> = defaultValue) {
+}: Partial<Card> = defaultValue) {
   return (
     <div className="text-black relative w-32 h-44 bg-linear-to-br from-indigo-500 via-purple-500 to-purple-700 rounded-2xl shadow-2xl flex flex-col justify-center items-center border-4 border-white p-1">
       <div className="bg-white border border-transparent rounded-xl w-full h-full relative">
