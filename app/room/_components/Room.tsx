@@ -7,6 +7,7 @@ import { RoomState } from './_models/Room';
 import RoomJoin from './states/RoomJoin';
 import CardReveal from './states/CardReveal';
 import ParticipantsList from './participants/ParticipantsList';
+import useSocket from '../_hooks/socket';
 
 export default function Room({ slug }: { slug: string }) {
   // Story poker card values
@@ -54,6 +55,8 @@ export default function Room({ slug }: { slug: string }) {
     console.log(`Joining room ${slug} as ${name}`);
     setRoomState('in-session');
   };
+
+  const socketConnection = useSocket();
 
   return (
     <div>
