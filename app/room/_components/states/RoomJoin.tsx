@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { RoomJoinProps } from '../_models/RoomJoin';
+import { RoomJoinProps } from '../models/RoomJoin';
 
 export default function RoomJoin({ slug, onJoinRoom }: RoomJoinProps) {
   const [name, setName] = useState('');

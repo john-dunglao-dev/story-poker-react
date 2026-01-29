@@ -3,7 +3,7 @@
 import FaceDownCard from './FaceDownCard';
 import { useMemo } from 'react';
 import FaceUpCard from './FaceUpCard';
-import { CardProps } from '../_models/Card';
+import { CardProps } from '../models/Card';
 
 export default function Card({ value, reveal }: Readonly<CardProps>) {
   const isRevealed = useMemo(() => reveal, [reveal]);

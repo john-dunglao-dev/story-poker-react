@@ -1,4 +1,4 @@
-import { CardSelectionProps } from '../_models/CardSelection';
+import { CardSelectionProps } from '../models/CardSelection';
 import Card from '../cards/Card';
 
 export default function CardSelection({

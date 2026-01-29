@@ -1,4 +1,4 @@
-import { CardRevealProps } from '../_models/CardReveal';
+import { CardRevealProps } from '../models/CardReveal';
 
 export default function CardReveal({ onReset }: CardRevealProps) {
   return (

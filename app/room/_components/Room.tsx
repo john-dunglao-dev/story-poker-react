@@ -1,13 +1,13 @@
 'use client';
 
 import CardSelection from './states/CardSelection';
-import { Card } from './_models/Card';
-import { useState } from 'react';
-import { RoomState } from './_models/Room';
+import { Card } from './models/Card';
 import RoomJoin from './states/RoomJoin';
 import CardReveal from './states/CardReveal';
 import ParticipantsList from './participants/ParticipantsList';
-import useSocket from '../_hooks/socket';
+import useParticipant from '../_hooks/participant';
+import useSession from '../_hooks/session';
+import useVote from '../_hooks/vote';
 
 export default function Room({ slug }: { slug: string }) {
   // Story poker card values
@@ -24,39 +24,23 @@ export default function Room({ slug }: { slug: string }) {
     { type: 'string', points: '☕' },
   ];
 
-  // Mock participants data
-  const participants = [
-    { id: 1, name: 'John Doe', hasVoted: true },
-    { id: 2, name: 'Jane Smith', hasVoted: true },
-    { id: 3, name: 'Bob Johnson', hasVoted: false },
-    { id: 4, name: 'Alice Williams', hasVoted: true },
-    { id: 5, name: 'Charlie Brown', hasVoted: false },
-  ];
-
-  const [roomState, setRoomState] = useState<RoomState>('joining');
-  const [selectedCard, setSelectedCard] = useState<Card | null>(null);
+  const { participants, join } = useParticipant();
+  const { roomState, resetVotes } = useSession();
+  const { submitVote, cardSelected } = useVote();
 
   const handleRevealCards = () => {
     console.log('Revealing cards..');
-    setRoomState('result');
   };
 
   const handleResetSelections = () => {
     console.log('Resetting selections..');
-    setSelectedCard(null);
-    setRoomState('in-session');
-  };
-
-  const handleSelectCard = (card: Card) => {
-    setSelectedCard(card);
+    resetVotes();
   };
 
   const handleJoinRoom = (slug: string, name: string) => {
     console.log(`Joining room ${slug} as ${name}`);
-    setRoomState('in-session');
+    join(slug, name);
   };
-
-  const socketConnection = useSocket();
 
   return (
     <div>
@@ -80,10 +64,10 @@ export default function Room({ slug }: { slug: string }) {
             ) : roomState === 'in-session' ? (
               <CardSelection
                 cards={cardValues}
-                selected={selectedCard}
+                selected={cardSelected}
                 onResetSelections={handleResetSelections}
                 onRevealCards={handleRevealCards}
-                onSelectCard={handleSelectCard}
+                onSelectCard={submitVote}
               />
             ) : (
               <CardReveal onReset={handleResetSelections} />

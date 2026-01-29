@@ -1,7 +1,7 @@
-import { ParticipantsListProps } from '../_models/ParticipantsList';
+import { ParticipantsListProps } from '../models/ParticipantsList';
 
 export default function ParticipantsList({
-  participants,
+  participants = [],
 }: ParticipantsListProps) {
   return (
     <div className="lg:w-64 w-full">
