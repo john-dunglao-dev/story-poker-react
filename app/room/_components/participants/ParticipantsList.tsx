@@ -15,7 +15,7 @@ export default function ParticipantsList({
         <ul className="space-y-3">
           {participants.map((participant) => (
             <li
-              key={participant.id}
+              key={participant.slug}
               className="bg-white rounded-lg p-3 flex items-center justify-between hover:bg-gray-100 transition-colors border border-gray-200"
             >
               <div className="flex items-center gap-3">
@@ -28,9 +28,9 @@ export default function ParticipantsList({
               </div>
               <div
                 className={`w-3 h-3 rounded-full ${
-                  participant.hasVoted ? 'bg-green-400' : 'bg-gray-400'
+                  participant.vote ? 'bg-green-400' : 'bg-gray-400'
                 }`}
-                title={participant.hasVoted ? 'Voted' : 'Not voted'}
+                title={participant.vote ? 'Voted' : 'Not voted'}
               ></div>
             </li>
           ))}

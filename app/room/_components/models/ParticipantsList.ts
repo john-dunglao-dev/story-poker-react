@@ -1,7 +1,10 @@
 export type Participant = {
-  id: number;
   name: string;
-  hasVoted: boolean;
+  slug: string;
+  connected: boolean;
+  vote?: {
+    value: string | number;
+  };
 };
 
 export interface ParticipantsListProps {

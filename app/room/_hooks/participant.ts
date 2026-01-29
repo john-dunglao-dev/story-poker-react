@@ -1,14 +1,19 @@
 import { useContext, useEffect, useState } from 'react';
 import { RoomSocketContext } from '../_components/RoomSocketProvider';
+import { Participant } from '../_components/models/ParticipantsList';
 
 export default function useParticipant() {
   const { socket, isConnected } = useContext(RoomSocketContext)!;
-  const [participants, setParticipants] = useState<Array<any>>([
-    { id: 1, name: 'John Doe', hasVoted: true },
-    { id: 2, name: 'Jane Smith', hasVoted: true },
-    { id: 3, name: 'Bob Johnson', hasVoted: false },
-    { id: 4, name: 'Alice Williams', hasVoted: true },
-    { id: 5, name: 'Charlie Brown', hasVoted: false },
+  const [participants, setParticipants] = useState<Array<Participant>>([
+    { name: 'John Doe', slug: 'john-doe', connected: false },
+    { name: 'Mary Jane', slug: 'mary-jane', connected: false },
+    {
+      name: 'Alice Smith',
+      slug: 'alice-smith',
+      connected: false,
+      vote: { value: 5 },
+    },
+    { name: 'Bob Johnson', slug: 'bob-johnson', connected: false },
   ]);
 
   const join = (slug: string, name: string) => {
@@ -31,9 +36,9 @@ export default function useParticipant() {
       console.log('User left:', data);
     };
 
-    const handleRoomUpdate = (data: any) => {
+    const handleRoomUpdate = (data: { participants: Participant[] }) => {
       console.log('Room updated through participants:', data);
-      // setParticipants(data.participants);
+      setParticipants([...Object.values(data.participants), ...participants]);
     };
 
     socket.on('user_joined', handleUserJoined);
