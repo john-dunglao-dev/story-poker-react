@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { login } from './_api/login';
 
 export default function Page() {
   const [email, setEmail] = useState('');
@@ -13,13 +14,9 @@ export default function Page() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      if (!res.ok) throw new Error((await res.text()) || 'Login failed');
-      window.location.href = '/';
+      const res = await login(email, password);
+      if (res.status !== 200) throw new Error(res.statusText || 'Login failed');
+      // window.location.href = '/';
     } catch (err: any) {
       setError(err?.message || 'Login failed');
     } finally {
