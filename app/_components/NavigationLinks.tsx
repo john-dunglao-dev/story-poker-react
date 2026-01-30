@@ -1,4 +1,10 @@
-export default function NavigationLinks() {
+export default function NavigationLinks({
+  isAuthenticated,
+  onLogout,
+}: {
+  isAuthenticated?: boolean;
+  onLogout?: (e: Event) => void;
+}) {
   return (
     <nav>
       <ul className="lg:flex lg:space-x-6 mt-16 lg:mt-0 space-y-4 lg:space-y-0">
@@ -26,14 +32,41 @@ export default function NavigationLinks() {
             Join Room
           </a>
         </li>
-        <li className="py-3 lg:py-0 border-b border-white/20 lg:border-0">
-          <a
-            href="/room/create"
-            className="text-white hover:text-gray-200 transition-colors"
-          >
-            Create Room
-          </a>
-        </li>
+
+        {!isAuthenticated && (
+          <li className="py-3 lg:py-0 border-b border-white/20 lg:border-0">
+            <a
+              href="/auth/login"
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              Sign In
+            </a>
+          </li>
+        )}
+
+        {/* Can create room only if authenticated */}
+        {isAuthenticated && (
+          <>
+            <li className="py-3 lg:py-0 border-b border-white/20 lg:border-0">
+              <a
+                href="/room/create"
+                className="text-white hover:text-gray-200 transition-colors"
+              >
+                Create Room
+              </a>
+            </li>
+
+            <li className="py-3 lg:py-0 border-b border-white/20 lg:border-0">
+              <a
+                href="#"
+                className="text-white hover:text-gray-200 transition-colors"
+                onClick={onLogout}
+              >
+                Sign Out
+              </a>
+            </li>
+          </>
+        )}
       </ul>
     </nav>
   );

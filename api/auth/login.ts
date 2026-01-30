@@ -7,3 +7,7 @@ export const login = (
 ): Promise<AxiosResponse> => {
   return api.post('/auth', { email, password });
 };
+
+export const getAuthenticatedUser = (): Promise<AxiosResponse> => {
+  return api.get('/auth/user');
+};

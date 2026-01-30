@@ -1,7 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { login } from './_api/login';
+import { login } from '@/api/auth/login';
 
 export default function Page() {
   const [email, setEmail] = useState('');
@@ -42,6 +42,7 @@ export default function Page() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="email"
             />
           </label>
 
@@ -53,6 +54,7 @@ export default function Page() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full px-3 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              autoComplete="current-password"
             />
           </label>
 

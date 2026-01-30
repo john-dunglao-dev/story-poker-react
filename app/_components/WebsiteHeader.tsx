@@ -8,14 +8,45 @@ import {
 } from '@headlessui/react';
 import { Ellipsis } from 'lucide-react';
 import NavigationLinks from './NavigationLinks';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { checkAuth } from '@/api/auth/check';
+import { deleteCookie } from 'cookies-next';
+import { useRouter } from 'next/navigation';
 
 export default function WebsiteHeader() {
+  const router = useRouter();
+
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   function handleToggleMenu(open: boolean) {
     setIsOpen(open);
   }
+
+  const handleLogout = (e: Event) => {
+    e.preventDefault();
+
+    deleteCookie('accessToken', { path: '/' });
+    deleteCookie('refreshToken', { path: '/' });
+    setIsAuthenticated(false);
+
+    router.push('/auth/login');
+    handleToggleMenu(false);
+  };
+
+  useEffect(() => {
+    checkAuth()
+      .then((res) => {
+        if (res.status === 200) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      })
+      .catch(() => {
+        setIsAuthenticated(false);
+      });
+  }, []);
 
   return (
     <header className="bg-linear-to-r from-blue-500/90 to-blue-500/70 backdrop-blur-sm shadow-md border-b-2 border-blue-600/40">
@@ -35,7 +66,10 @@ export default function WebsiteHeader() {
         </div>
 
         <div className="hidden lg:block">
-          <NavigationLinks />
+          <NavigationLinks
+            isAuthenticated={isAuthenticated}
+            onLogout={handleLogout}
+          />
         </div>
 
         <div className="lg:hidden flex items-center">
@@ -71,7 +105,10 @@ export default function WebsiteHeader() {
                 leaveTo="translate-x-full"
               >
                 <DialogPanel className="w-64 h-full bg-blue-400 backdrop-blur-xs px-3 border-l-2 border-blue-600/50">
-                  <NavigationLinks />
+                  <NavigationLinks
+                    isAuthenticated={isAuthenticated}
+                    onLogout={handleLogout}
+                  />
                 </DialogPanel>
               </TransitionChild>
             </div>
