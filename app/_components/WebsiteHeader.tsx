@@ -8,49 +8,34 @@ import {
 } from '@headlessui/react';
 import { Ellipsis } from 'lucide-react';
 import NavigationLinks from './NavigationLinks';
-import { useState, useLayoutEffect } from 'react';
-import { checkAuth } from '@/api/auth/check';
+import { useContext, useLayoutEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppSelector } from '@/lib/store/hooks';
+import { AuthContext } from './providers/AuthProvider';
+import { logout } from '@/api/auth/login';
+import { clearAccessToken } from '@/lib/axios';
 
 export default function WebsiteHeader() {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const accessToken = useAppSelector((state) => state.auth.accessToken);
+
+  const { isAuthenticated, user, resetAuthState } = useContext(AuthContext);
 
   function handleToggleMenu(open: boolean) {
     setIsOpen(open);
   }
 
-  const handleLogout = (e: Event) => {
+  const handleLogout = async (e: Event) => {
     e.preventDefault();
 
-    setIsAuthenticated(false);
-
+    await logout();
+    clearAccessToken();
+    resetAuthState();
     router.push('/auth/login');
     handleToggleMenu(false);
   };
 
-  useLayoutEffect(() => {
-    if (!accessToken) {
-      setIsAuthenticated(false);
-      return;
-    }
-
-    checkAuth()
-      .then((res) => {
-        if (res.status === 200) {
-          setIsAuthenticated(true);
-        } else {
-          setIsAuthenticated(false);
-        }
-      })
-      .catch(() => {
-        setIsAuthenticated(false);
-      });
-  }, [accessToken]);
+  useLayoutEffect(() => {}, [isAuthenticated]);
 
   return (
     <header className="bg-linear-to-r from-blue-500/90 to-blue-500/70 backdrop-blur-sm shadow-md border-b-2 border-blue-600/40">

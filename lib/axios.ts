@@ -30,6 +30,10 @@ const getAccessToken = async (): Promise<string> => {
   return refreshPromise;
 };
 
+export const clearAccessToken = () => {
+  accessToken = undefined;
+};
+
 api.interceptors.request.use(
   async (config) => {
     // You can add authorization headers or other custom headers here
@@ -57,7 +61,7 @@ api.interceptors.response.use(
       !error.config._retry
     ) {
       error.config._retry = true;
-      accessToken = undefined; // clear current access token
+      clearAccessToken(); // clear current access token
 
       const token = await getAccessToken();
 

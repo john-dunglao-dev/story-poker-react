@@ -16,7 +16,7 @@ export default function Page() {
     try {
       const res = await login(email, password);
       if (res.status !== 200) throw new Error(res.statusText || 'Login failed');
-      // window.location.href = '/';
+      window.location.href = '/';
     } catch (err: any) {
       setError(err?.message || 'Login failed');
     } finally {

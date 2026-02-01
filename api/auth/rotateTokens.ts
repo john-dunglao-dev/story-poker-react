@@ -8,7 +8,7 @@ export const rotateTokens = (): Promise<
 > => {
   // access token is added through interceptor
   return axios.post(
-    '/auth/refresh-token',
+    '/auth/refresh',
     {},
     {
       withCredentials: true,

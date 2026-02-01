@@ -1,4 +1,5 @@
 import { API_BASE_URL } from '@/constants/common';
+import api from '@/lib/axios';
 import axios, { AxiosResponse } from 'axios';
 
 // does not use axios library instance to avoid interceptor loops
@@ -15,6 +16,13 @@ export const login = (
         Accept: 'application/json',
       },
       baseURL: API_BASE_URL,
+      // this ensures cookies (like refresh token) are set by the browser
+      withCredentials: true,
     }
   );
+};
+
+// notice that this uses the api instance with interceptors
+export const logout = (): Promise<AxiosResponse> => {
+  return api.post('/auth/sign-out', {}, { withCredentials: true });
 };
