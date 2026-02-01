@@ -8,16 +8,17 @@ import {
 } from '@headlessui/react';
 import { Ellipsis } from 'lucide-react';
 import NavigationLinks from './NavigationLinks';
-import { useEffect, useState } from 'react';
+import { useState, useLayoutEffect } from 'react';
 import { checkAuth } from '@/api/auth/check';
-import { deleteCookie } from 'cookies-next';
 import { useRouter } from 'next/navigation';
+import { useAppSelector } from '@/lib/store/hooks';
 
 export default function WebsiteHeader() {
   const router = useRouter();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const accessToken = useAppSelector((state) => state.auth.accessToken);
 
   function handleToggleMenu(open: boolean) {
     setIsOpen(open);
@@ -26,15 +27,18 @@ export default function WebsiteHeader() {
   const handleLogout = (e: Event) => {
     e.preventDefault();
 
-    deleteCookie('accessToken', { path: '/' });
-    deleteCookie('refreshToken', { path: '/' });
     setIsAuthenticated(false);
 
     router.push('/auth/login');
     handleToggleMenu(false);
   };
 
-  useEffect(() => {
+  useLayoutEffect(() => {
+    if (!accessToken) {
+      setIsAuthenticated(false);
+      return;
+    }
+
     checkAuth()
       .then((res) => {
         if (res.status === 200) {
@@ -46,7 +50,7 @@ export default function WebsiteHeader() {
       .catch(() => {
         setIsAuthenticated(false);
       });
-  }, []);
+  }, [accessToken]);
 
   return (
     <header className="bg-linear-to-r from-blue-500/90 to-blue-500/70 backdrop-blur-sm shadow-md border-b-2 border-blue-600/40">

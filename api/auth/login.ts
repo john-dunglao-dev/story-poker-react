@@ -1,13 +1,18 @@
-import api from '@/lib/axios';
-import { AxiosResponse } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
+// does not use axios library instance to avoid interceptor loops
 export const login = (
   email: string,
   password: string
 ): Promise<AxiosResponse> => {
-  return api.post('/auth', { email, password });
-};
-
-export const getAuthenticatedUser = (): Promise<AxiosResponse> => {
-  return api.get('/auth/user');
+  return axios.post(
+    '/auth',
+    { email, password },
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    }
+  );
 };
