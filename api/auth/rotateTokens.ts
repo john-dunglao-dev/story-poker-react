@@ -1,3 +1,4 @@
+import { API_BASE_URL } from '@/constants/common';
 import axios, { AxiosResponse } from 'axios';
 
 // Rotates the access and refresh tokens by calling the refresh token endpoint.
@@ -15,6 +16,7 @@ export const rotateTokens = (): Promise<
         'Content-Type': 'application/json',
         Accept: 'application/json',
       },
+      baseURL: API_BASE_URL,
     }
   );
 };

@@ -1,12 +1,13 @@
 import axios, { HttpStatusCode } from 'axios';
 import { rotateTokens } from '@/api/auth/rotateTokens';
+import { API_BASE_URL } from '@/constants/common';
 
 const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
   },
-  baseURL: 'http://api.storypoker.local',
+  baseURL: API_BASE_URL,
 });
 
 let accessToken: string | undefined;
