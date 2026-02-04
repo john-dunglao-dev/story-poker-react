@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { RoomJoinProps } from '../models/RoomJoin';
 
-export default function RoomJoin({ slug, onJoinRoom }: RoomJoinProps) {
+export default function RoomJoin({
+  slug,
+  roomName,
+  onJoinRoom,
+}: RoomJoinProps) {
   const [name, setName] = useState('');
 
   return (
     <div className="text-center text-gray-900">
-      <h2 className="text-2xl font-bold mb-4">Join Room: {slug}</h2>
+      <h2 className="text-2xl font-bold mb-4">Join Room: {roomName}</h2>
       <p className="text-gray-600">This is where users can join the room.</p>
 
       <div>

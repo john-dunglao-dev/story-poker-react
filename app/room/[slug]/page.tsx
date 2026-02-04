@@ -1,4 +1,5 @@
 import Room from '../_components/Room';
+import { RoomProvider } from '../_components/RoomProvider';
 import RoomSocketProvider from '../_components/RoomSocketProvider';
 
 export default async function InsideRoomPage({
@@ -11,9 +12,11 @@ export default async function InsideRoomPage({
   return (
     <div className="min-h-screen bg-white p-4">
       <div className="container mx-auto">
-        <RoomSocketProvider>
-          <Room slug={slug} />
-        </RoomSocketProvider>
+        <RoomProvider roomSlug={slug}>
+          <RoomSocketProvider>
+            <Room slug={slug} />
+          </RoomSocketProvider>
+        </RoomProvider>
       </div>
     </div>
   );

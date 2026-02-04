@@ -4,6 +4,7 @@ import './globals.css';
 import WebsiteHeader from './_components/WebsiteHeader';
 import StoreProvider from './_components/providers/StoreProvider';
 import { AuthProvider } from './_components/providers/AuthProvider';
+import { ToastContainer } from 'react-toastify';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -43,6 +44,15 @@ export default function RootLayout({
             </footer>
           </AuthProvider>
         </StoreProvider>
+
+        <ToastContainer
+          position="bottom-left"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={true}
+          closeOnClick
+          pauseOnFocusLoss
+        />
       </body>
     </html>
   );

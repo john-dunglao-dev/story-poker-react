@@ -8,6 +8,9 @@ import ParticipantsList from './participants/ParticipantsList';
 import useParticipant from '../_hooks/participant';
 import useSession from '../_hooks/session';
 import useVote from '../_hooks/vote';
+import { useContext } from 'react';
+import { RoomContext } from './RoomProvider';
+import { IRoom } from './models/Room';
 
 export default function Room({ slug }: { slug: string }) {
   // Story poker card values
@@ -24,6 +27,7 @@ export default function Room({ slug }: { slug: string }) {
     { type: 'string', points: '☕' },
   ];
 
+  const roomData = useContext<IRoom | null>(RoomContext);
   const { participants, join } = useParticipant();
   const { roomState, resetVotes } = useSession();
   const { submitVote, cardSelected } = useVote();
@@ -47,7 +51,9 @@ export default function Room({ slug }: { slug: string }) {
       {/* Header */}
       <div className="text-gray-900 text-center mb-8">
         <h1 className="text-3xl md:text-4xl font-bold mb-2">Story Poker</h1>
-        <p className="text-sm md:text-base text-gray-600">Room: {slug}</p>
+        <p className="text-sm md:text-base text-gray-600">
+          Room: {roomData?.name || slug}
+        </p>
       </div>
 
       {/* Main Layout */}
@@ -60,7 +66,11 @@ export default function Room({ slug }: { slug: string }) {
         <div className="flex-1">
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 shadow-lg">
             {roomState === 'joining' ? (
-              <RoomJoin slug={slug} onJoinRoom={handleJoinRoom} />
+              <RoomJoin
+                slug={slug}
+                roomName={roomData?.name || slug}
+                onJoinRoom={handleJoinRoom}
+              />
             ) : roomState === 'in-session' ? (
               <CardSelection
                 cards={cardValues}
