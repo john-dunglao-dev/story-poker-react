@@ -1,7 +1,6 @@
 'use client';
 
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 
 export default function LoginForm() {
@@ -9,8 +8,6 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

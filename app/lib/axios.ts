@@ -14,7 +14,7 @@ export interface CustomAxiosConfig extends AxiosRequestConfig {
 export class CustomAxios {
   private instance: AxiosInstance | null = null;
   private accessToken: string | null = null;
-  private refreshPromise: Promise<string> | null = null;
+  private refreshPromise: Promise<string | null> | null = null;
 
   getInstance(): AxiosInstance {
     if (!this.instance) {
@@ -26,7 +26,7 @@ export class CustomAxios {
     return this.instance;
   }
 
-  setServerInstance(baseURL: string, cookieHeader: string) {
+  setServerInstance(baseURL: string, cookieHeader?: string) {
     this.instance = axios.create({
       baseURL,
       headers: {
@@ -48,12 +48,16 @@ export class CustomAxios {
     return cookieJar.toString();
   }
 
-  private async getAccessToken(): Promise<string> {
+  private async getAccessToken(): Promise<string | null> {
     await this.fetchAccessTokenFromCookies();
     if (this.accessToken) return this.accessToken;
 
     if (!this.refreshPromise) {
       const cookieJar = await cookies();
+
+      if (!cookieJar.get('refreshToken')) {
+        return null; // no refresh token, cannot get new access token
+      }
 
       this.refreshPromise = axios
         .post<{ accessToken: string }>(
@@ -77,9 +81,9 @@ export class CustomAxios {
     return this.refreshPromise;
   }
 
-  private clearAccessToken = () => {
+  clearAccessTokenMemory() {
     this.accessToken = null;
-  };
+  }
 
   setRequestInterceptor() {
     if (!this.instance) {
@@ -124,7 +128,7 @@ export class CustomAxios {
           !originalRequest._retry
         ) {
           originalRequest._retry = true;
-          this.clearAccessToken(); // clear current access token
+          this.clearAccessTokenMemory(); // clear current access token
 
           try {
             const newToken = await this.getAccessToken();
@@ -138,7 +142,7 @@ export class CustomAxios {
               return this.instance!(originalRequest);
             }
           } catch (refreshError) {
-            this.clearAccessToken();
+            this.clearAccessTokenMemory();
             return Promise.reject(refreshError);
           }
         }
@@ -156,12 +160,10 @@ export const serverAxios = async (
   addResponseInterceptor = true
 ): Promise<AxiosInstance> => {
   const cookieHeader = await CustomAxios.getCookieHeader();
-
-  if (!cookieHeader) {
-    throw new Error('No cookies found');
-  }
-
-  const api = new CustomAxios().setServerInstance(baseURL, cookieHeader);
+  const api = new CustomAxios().setServerInstance(
+    baseURL,
+    cookieHeader || undefined
+  );
 
   if (addRequestInterceptor) {
     api.setRequestInterceptor();
@@ -171,5 +173,12 @@ export const serverAxios = async (
     api.setResponseInterceptor();
   }
 
+  return api.getInstance();
+};
+
+export const ssrAxiosNoAuth = async (
+  baseURL: string = BASE_URL
+): Promise<AxiosInstance> => {
+  const api = new CustomAxios().setServerInstance(baseURL, undefined);
   return api.getInstance();
 };

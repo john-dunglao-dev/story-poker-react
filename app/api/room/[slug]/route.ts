@@ -1,5 +1,6 @@
-import { serverAxios } from '@/app/lib/axios';
+import { createServerAxiosInstance } from '@/app/lib/axios-server';
 import { API_BASE_URL } from '@/constants/common';
+import { NextResponse } from 'next/server';
 
 /**
  * ? Fetches a room by its slug.
@@ -7,17 +8,18 @@ import { API_BASE_URL } from '@/constants/common';
  * @param slug
  * @returns
  */
-export async function GET({ params }: { params: { slug: string } }) {
-  const api = await serverAxios(
-    API_BASE_URL,
-    false, // do not include credentials for server-side requests
-    false // do not use interceptors for server-side requests
-  );
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ slug: string }> }
+) {
+  const { slug } = await params;
+  const api = createServerAxiosInstance({ baseURL: API_BASE_URL });
+
+  console.log('Fetching room with slug:', slug);
 
   try {
-    const { slug } = params;
     const response = await api.get(`/rooms/${slug}`);
-    return response;
+    return NextResponse.json(response.data);
   } catch (error) {
     console.error('Error fetching room:', error);
     throw error;

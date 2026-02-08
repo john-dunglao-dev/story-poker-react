@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { serverAxios } from '@/app/lib/axios';
 import { BASE_URL } from '@/constants/common';
+import { cookies } from 'next/headers';
 
 /**
  * ? Middleware to check if the user is already authenticated
@@ -12,6 +13,13 @@ import { BASE_URL } from '@/constants/common';
 export async function proxy(request: NextRequest) {
   console.log('Checking if user is authenticated');
   try {
+    const cookieJar = await cookies();
+
+    if (!cookieJar.get('refreshToken')) {
+      console.log('No refresh token cookie found, user is not authenticated');
+      return NextResponse.next();
+    }
+
     const api = await serverAxios(
       BASE_URL, // use BASE_URL to ensure cookies are included in requests
       true, // include credentials for server-side requests

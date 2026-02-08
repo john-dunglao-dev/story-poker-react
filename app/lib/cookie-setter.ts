@@ -12,3 +12,19 @@ export const setCookieToResponse = (
     response.headers.set('Set-Cookie', cookie);
   }
 };
+
+export const clearCookieFromResponse = (
+  response: NextResponse,
+  cookieName: string,
+  options?: Record<string, any>
+) => {
+  response.cookies.delete({
+    name: cookieName,
+    path: '/',
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    domain: '.storypoker.local',
+    ...options,
+  });
+};

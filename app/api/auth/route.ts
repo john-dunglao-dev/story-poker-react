@@ -1,4 +1,8 @@
 import { serverAxios } from '@/app/lib/axios';
+import {
+  createServerAxiosInstance,
+  getServerAccessTokenFromCookies,
+} from '@/app/lib/axios-server';
 import { setCookieToResponse } from '@/app/lib/cookie-setter';
 import { API_BASE_URL } from '@/constants/common';
 import { AxiosError, HttpStatusCode } from 'axios';
@@ -13,11 +17,7 @@ import { NextResponse } from 'next/server';
  * @returns
  */
 export async function POST(req: Request) {
-  const api = await serverAxios(
-    API_BASE_URL,
-    false, // do not add request interceptor to avoid loops
-    false // do not add response interceptor to avoid loops
-  );
+  const api = createServerAxiosInstance({ baseURL: API_BASE_URL });
   const { email, password } = await req.json();
   try {
     const apiResponse = await api.post(
@@ -62,14 +62,25 @@ export async function POST(req: Request) {
  * ? Gets the authenticated user's information.
  */
 export async function GET() {
-  const api = await serverAxios(
-    API_BASE_URL,
-    true, // add request interceptor to include cookies
-    true // add response interceptor to handle token refresh if needed
-  );
+  const token = await getServerAccessTokenFromCookies();
+
+  if (token.status !== 'success') {
+    return NextResponse.json({
+      success: false,
+      message: 'No active session found',
+    });
+  }
+
+  const api = createServerAxiosInstance({
+    baseURL: API_BASE_URL,
+    accessToken: token.accessToken,
+  });
   try {
-    const response = await api.get('/auth', { withCredentials: true });
-    return NextResponse.json(response.data);
+    const response = await api.get<{ isAuthenticated: boolean }>('/auth');
+    return NextResponse.json({
+      success: true,
+      isAuthenticated: response.data.isAuthenticated,
+    });
   } catch (error) {
     console.error('Error fetching authenticated user:', error);
     throw error;

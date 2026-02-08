@@ -1,6 +1,7 @@
-import { serverAxios } from '@/app/lib/axios';
+import { createServerAxiosInstance } from '@/app/lib/axios-server';
 import { setCookieToResponse } from '@/app/lib/cookie-setter';
 import { API_BASE_URL } from '@/constants/common';
+import { AxiosError, HttpStatusCode } from 'axios';
 import { NextResponse } from 'next/server';
 
 /**
@@ -8,16 +9,39 @@ import { NextResponse } from 'next/server';
  * ! We are using axios directly here to avoid interceptor loops.
  */
 export async function POST() {
-  const api = await serverAxios(
-    API_BASE_URL,
-    false, // do not include access token in this request
-    false // do not add response interceptor to this request
-  );
-  const apiResponse = await api.post('/auth/refresh');
+  const api = createServerAxiosInstance({ baseURL: API_BASE_URL });
 
-  const response = NextResponse.json({ success: true });
+  try {
+    const apiResponse = await api.post('/auth/refresh');
 
-  setCookieToResponse(response, apiResponse.headers['set-cookie']);
+    const response = NextResponse.json({ success: true });
 
-  return response;
+    setCookieToResponse(response, apiResponse.headers['set-cookie']);
+
+    return response;
+  } catch (error) {
+    if (
+      error instanceof AxiosError &&
+      error.response?.status === HttpStatusCode.Unauthorized
+    ) {
+      console.debug(
+        'Refresh token is invalid or expired. Clearing tokens from memory and cookies.'
+      );
+      // if refresh token is also invalid/expired, clear tokens from cookies
+      const response = NextResponse.json(
+        { success: false },
+        { status: HttpStatusCode.Unauthorized }
+      );
+      // clear cookies by setting them with an expired date
+      setCookieToResponse(response, error.response?.headers?.['set-cookie']);
+
+      return response;
+    }
+
+    console.error('Unexpected error refreshing token:', error);
+    return NextResponse.json(
+      { success: false, message: 'Unexpected error refreshing token' },
+      { status: HttpStatusCode.InternalServerError }
+    );
+  }
 }

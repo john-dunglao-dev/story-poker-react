@@ -1,5 +1,9 @@
-import { serverAxios } from '@/app/lib/axios';
+import {
+  createServerAxiosInstance,
+  getServerAccessTokenFromCookies,
+} from '@/app/lib/axios-server';
 import { API_BASE_URL } from '@/constants/common';
+import { unauthorized } from 'next/navigation';
 
 /**
  * ? Creates a new room with the given name.
@@ -8,11 +12,16 @@ import { API_BASE_URL } from '@/constants/common';
  * @returns
  */
 export async function POST(name: string) {
-  const api = await serverAxios(
-    API_BASE_URL,
-    true, // withCredentials: true to include cookies for authentication
-    true // isServer: true to use server-side axios instance
-  );
+  const token = await getServerAccessTokenFromCookies();
+
+  if (token.status !== 'success') {
+    return unauthorized();
+  }
+
+  const api = createServerAxiosInstance({
+    baseURL: API_BASE_URL,
+    accessToken: token.accessToken,
+  });
 
   try {
     const response = await api.post(

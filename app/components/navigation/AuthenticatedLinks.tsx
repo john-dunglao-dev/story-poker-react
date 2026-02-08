@@ -15,7 +15,7 @@ export default function AuthenticatedLinks() {
 
   return (
     <>
-      <NavLinkItem href="/room/join">Create Room</NavLinkItem>
+      <NavLinkItem href="/room/create">Create Room</NavLinkItem>
       <NavLinkItemButton onClick={handleSignOut}>Sign Out</NavLinkItemButton>
     </>
   );

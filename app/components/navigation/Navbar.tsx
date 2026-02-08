@@ -20,12 +20,13 @@ export default async function Navbar() {
         true // includeAuthTokens
       );
 
-      const user = await api
-        .get('/api/auth')
-        .then((res) => res.data)
+      const isAuthenticated = await api
+        .get<{ success: Boolean; isAuthenticated: boolean }>('/api/auth')
+        .then((res) => res.data.isAuthenticated)
         .catch(() => null);
 
-      if (user) {
+      if (isAuthenticated) {
+        console.log('Authenticated:', isAuthenticated);
         return true;
       }
 
@@ -35,7 +36,7 @@ export default async function Navbar() {
     }
   };
 
-  let isAuthenticated = await checkAuth();
+  const isAuthenticated = await checkAuth();
 
   return (
     <nav>
