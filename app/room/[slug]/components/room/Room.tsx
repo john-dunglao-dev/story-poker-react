@@ -8,6 +8,8 @@ import ParticipantsList from '@/app/room/[slug]/components/participants/Particip
 import useParticipant from '@/app/room/[slug]/hooks/participant';
 import useSession from '@/app/room/[slug]/hooks/session';
 import useVote from '@/app/room/[slug]/hooks/vote';
+import { useContext, useLayoutEffect, useState } from 'react';
+import { SocketContext } from '@/app/room/[slug]/providers/SocketProvider';
 
 export default function Room({ slug, name }: { slug: string; name: string }) {
   // Story poker card values
@@ -27,6 +29,8 @@ export default function Room({ slug, name }: { slug: string; name: string }) {
   const { participants, join } = useParticipant();
   const { roomState, resetVotes } = useSession();
   const { submitVote, cardSelected } = useVote();
+  const [isLoading, setIsLoading] = useState(true);
+  const { isConnected } = useContext(SocketContext)!;
 
   const handleRevealCards = () => {
     console.log('Revealing cards..');
@@ -41,6 +45,13 @@ export default function Room({ slug, name }: { slug: string; name: string }) {
     console.log(`Joining room ${slug} as ${name}`);
     join(slug, name);
   };
+
+  useLayoutEffect(() => {
+    if (isConnected) {
+      console.log('Connected to socket in Room component');
+      setIsLoading(false);
+    }
+  }, [isConnected]);
 
   return (
     <div>
@@ -60,11 +71,17 @@ export default function Room({ slug, name }: { slug: string; name: string }) {
         <div className="flex-1">
           <div className="bg-gray-50 rounded-2xl p-6 border border-gray-200 shadow-lg">
             {roomState === 'joining' ? (
-              <RoomJoin
-                slug={slug}
-                roomName={name}
-                onJoinRoom={handleJoinRoom}
-              />
+              isLoading ? (
+                <div className="text-center text-gray-500">
+                  Connecting to room...
+                </div>
+              ) : (
+                <RoomJoin
+                  slug={slug}
+                  roomName={name}
+                  onJoinRoom={handleJoinRoom}
+                />
+              )
             ) : roomState === 'in-session' ? (
               <CardSelection
                 cards={cardValues}
