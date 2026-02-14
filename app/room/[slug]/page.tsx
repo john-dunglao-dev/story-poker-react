@@ -1,9 +1,9 @@
-import { ssrAxiosNoAuth } from '@/app/lib/axios';
 import { BASE_URL, WS_BASE_URL } from '@/constants/common';
 import { AxiosError } from 'axios';
 import { notFound } from 'next/navigation';
 import SocketProvider from '@/app/room/[slug]/providers/SocketProvider';
 import Room from '@/app/room/[slug]/components/room/Room';
+import { createServerAxiosInstance } from '@/app/lib/axios-server';
 
 export default async function RoomPage({
   params,
@@ -11,8 +11,7 @@ export default async function RoomPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-
-  const api = await ssrAxiosNoAuth(BASE_URL);
+  const api = createServerAxiosInstance({ baseURL: BASE_URL });
   let room = null;
 
   try {

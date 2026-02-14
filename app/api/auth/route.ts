@@ -1,4 +1,3 @@
-import { serverAxios } from '@/app/lib/axios';
 import {
   createServerAxiosInstance,
   getServerAccessTokenFromCookies,

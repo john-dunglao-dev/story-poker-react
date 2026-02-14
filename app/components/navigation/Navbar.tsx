@@ -1,24 +1,25 @@
 import AuthenticatedLinks from '@/app/components/navigation/AuthenticatedLinks';
 import UnauthenticatedLinks from '@/app/components/navigation/UnauthenticatedLinks';
 import NavLinkItem from '@/app/components/common/NavLinkItem';
-import { serverAxios } from '@/app/lib/axios';
+import {
+  createServerAxiosInstance,
+  getServerAccessTokenFromCookies,
+} from '@/app/lib/axios-server';
 import { BASE_URL } from '@/constants/common';
-import { cookies } from 'next/headers';
 
 export default async function Navbar() {
   const checkAuth = async () => {
     try {
-      const cookieJar = await cookies();
+      const token = await getServerAccessTokenFromCookies();
 
-      if (!cookieJar.get('refreshToken')) {
+      if (token?.status !== 'success' || !token.accessToken) {
         return false;
       }
 
-      const api = await serverAxios(
-        BASE_URL,
-        true, // withCredentials
-        true // includeAuthTokens
-      );
+      const api = createServerAxiosInstance({
+        baseURL: BASE_URL,
+        accessToken: token.accessToken,
+      });
 
       const isAuthenticated = await api
         .get<{ success: Boolean; isAuthenticated: boolean }>('/api/auth')
