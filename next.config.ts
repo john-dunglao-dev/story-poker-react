@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['@phosphor-icons/react'],
     authInterrupts: true,
   },
+  allowedDevOrigins: ['www.storypoker.local'],
 };
 
 export default nextConfig;

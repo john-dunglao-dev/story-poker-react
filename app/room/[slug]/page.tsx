@@ -1,7 +1,9 @@
 import { ssrAxiosNoAuth } from '@/app/lib/axios';
-import { BASE_URL } from '@/constants/common';
+import { BASE_URL, WS_BASE_URL } from '@/constants/common';
 import { AxiosError } from 'axios';
 import { notFound } from 'next/navigation';
+import SocketProvider from '@/app/room/[slug]/providers/SocketProvider';
+import Room from '@/app/room/[slug]/components/room/Room';
 
 export default async function RoomPage({
   params,
@@ -28,9 +30,11 @@ export default async function RoomPage({
   return (
     <div className="min-h-screen bg-white p-4">
       <div className="container mx-auto">
-        <h1 className="text-2xl font-bold mb-4">Room: {room.name}</h1>
-        <p className="text-gray-700">Slug: {room.slug}</p>
-        <p className="text-gray-700">ID: {room.id}</p>
+        {/* You can add more room details or components here */}
+        <SocketProvider websocketUrl={WS_BASE_URL}>
+          {/* Your components that need access to the WebSocket connection can go here */}
+          <Room slug={room.slug} name={room.name} />
+        </SocketProvider>
       </div>
     </div>
   );
