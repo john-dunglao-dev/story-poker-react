@@ -1,5 +1,7 @@
-import axios from 'axios';
+import { BASE_URL } from '@/constants/common';
+import axios, { AxiosRequestConfig } from 'axios';
 import { cookies } from 'next/headers';
+import { setCookieFromHeaders } from './cookie-setter';
 
 export type AccessTokenResult =
   | { status: 'success'; accessToken: string }
@@ -30,6 +32,8 @@ export const getServerAccessTokenFromCookies =
   async (): Promise<AccessTokenResult> => {
     const cookieJar = await cookies();
 
+    console.debug('Cookies in request:', cookieJar.toString());
+
     const accessToken = cookieJar.get('accessToken')?.value || null;
     if (accessToken) return { status: 'success', accessToken };
 
@@ -37,14 +41,24 @@ export const getServerAccessTokenFromCookies =
     if (!refreshToken) return { status: 'unauthenticated' }; // no refresh token, cannot get new access token
 
     const response = await axios.post<{ accessToken: string }>(
-      `${process.env.API_BASE_URL}/api/auth/refresh`,
+      '/api/auth/refresh',
       {},
       {
+        baseURL: BASE_URL,
         headers: {
           Cookie: cookieJar.toString(), // pass cookies from the request to the API call
         },
       }
     );
+
+    const newTokens = response.headers?.['set-cookie'];
+
+    if (newTokens) {
+      console.debug('Received new tokens from refresh endpoint:', newTokens);
+      setCookieFromHeaders(newTokens);
+    }
+
+    console.debug('Response data from refresh endpoint:', response.data);
 
     if (response.data.accessToken) {
       return { status: 'success', accessToken: response.data.accessToken };
@@ -52,3 +66,18 @@ export const getServerAccessTokenFromCookies =
 
     return { status: 'refresh_failed' };
   };
+
+export const retryRequestWithNewAccessToken = async (
+  originalConfig: AxiosRequestConfig
+) => {
+  const tokenResult = await getServerAccessTokenFromCookies();
+
+  if (tokenResult.status === 'success') {
+    originalConfig.headers = {
+      ...originalConfig.headers,
+      Authorization: `Bearer ${tokenResult.accessToken}`,
+    };
+
+    return axios(originalConfig); // retry original request with new access token
+  }
+};

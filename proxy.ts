@@ -1,5 +1,6 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { proxy as authProxy } from '@/proxies/auth';
+import { proxy as tokenRotationProxy } from '@/proxies/cookie-token-rotation';
 
 /**
  * ? Middleware to check if the user is already authenticated
@@ -11,19 +12,24 @@ import { proxy as authProxy } from '@/proxies/auth';
 export async function proxy(request: NextRequest) {
   console.log('running global proxy...');
 
+  const response = NextResponse.next();
+
+  await tokenRotationProxy(request, response);
+
   if (
     request.nextUrl.pathname.startsWith('/auth/login') ||
     request.nextUrl.pathname.startsWith('/auth/register')
   ) {
     console.log('Proxy: Checking authentication for login or register page');
-    return await authProxy(request);
+    // return await authProxy(request);
   }
+
+  return response;
 }
 
 export const config = {
   matcher: [
     // These paths will be protected by the auth proxy middleware
-    '/auth/login',
-    '/auth/register',
+    '/((?!api|_next/static|_next/image|favicon.ico|.*\\.\\w+).*)',
   ],
 };

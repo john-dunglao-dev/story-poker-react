@@ -2,6 +2,7 @@ import { createServerAxiosInstance } from '@/app/lib/axios-server';
 import { setCookieToResponse } from '@/app/lib/cookie-setter';
 import { API_BASE_URL } from '@/constants/common';
 import { AxiosError, HttpStatusCode } from 'axios';
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 /**
@@ -9,7 +10,11 @@ import { NextResponse } from 'next/server';
  * ! We are using axios directly here to avoid interceptor loops.
  */
 export async function POST() {
-  const api = createServerAxiosInstance({ baseURL: API_BASE_URL });
+  const cookieJar = await cookies();
+  const api = createServerAxiosInstance({
+    baseURL: API_BASE_URL,
+    cookieHeader: cookieJar.toString(),
+  });
 
   try {
     const apiResponse = await api.post('/auth/refresh');

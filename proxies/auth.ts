@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { serverAxios } from '@/app/lib/axios';
-import { BASE_URL } from '@/constants/common';
-import { cookies } from 'next/headers';
+import { createServerAxiosInstance } from '@/app/lib/axios-server';
+import { API_BASE_URL, BASE_URL } from '@/constants/common';
+import { setCookieToResponse } from '@/app/lib/cookie-setter';
+import { AxiosError, HttpStatusCode } from 'axios';
 
 /**
  * ? Middleware to check if the user is already authenticated
@@ -11,34 +12,63 @@ import { cookies } from 'next/headers';
  * @returns
  */
 export async function proxy(request: NextRequest) {
-  console.log('Checking if user is authenticated');
-  try {
-    const cookieJar = await cookies();
+  const refreshToken = request.cookies.get('refreshToken')?.value;
 
-    if (!cookieJar.get('refreshToken')) {
-      console.log('No refresh token cookie found, user is not authenticated');
-      return NextResponse.next();
-    }
-
-    const api = await serverAxios(
-      BASE_URL, // use BASE_URL to ensure cookies are included in requests
-      true, // include credentials for server-side requests
-      true // use interceptors for server-side requests
+  if (!refreshToken) {
+    console.debug(
+      'No refresh token found in cookies, user is not authenticated'
     );
-    const user = await api.get('/api/auth').then((res) => res.data);
-    // .catch(() => null);
+    return NextResponse.next();
+  }
 
-    console.log('Authenticated user:', user);
+  try {
+    const cookieHeader = request.cookies.toString();
+    const api = createServerAxiosInstance({
+      baseURL: API_BASE_URL,
+      cookieHeader, // pass cookies from the request to the API call
+    });
 
-    if (user) {
-      console.log('User is authenticated, redirecting to home page');
+    const apiResponse = await api.post(
+      '/auth/verify-refresh',
+      {},
+      {
+        headers: {
+          Cookie: cookieHeader, // ensure cookies are sent with this request
+        },
+      }
+    );
+
+    if (apiResponse.status === HttpStatusCode.Ok) {
+      console.debug('Refresh token is valid, user is authenticated');
       return NextResponse.redirect(new URL('/', request.url));
     }
 
-    console.log('No authenticated user found, allowing access to auth pages');
+    console.debug(
+      'API call to verify refresh token succeeded but returned non-200 status, treating as not authenticated'
+    );
     return NextResponse.next();
   } catch (err) {
-    console.error('Error checking authentication:', err);
+    if (
+      err instanceof AxiosError &&
+      err.response?.status === HttpStatusCode.Unauthorized
+    ) {
+      console.debug(
+        'Refresh token is invalid or expired, clearing cookies and redirecting to home page'
+      );
+
+      const response = NextResponse.next();
+      const setCookies = err.response.headers?.['set-cookie'];
+
+      console.debug('Set-Cookie headers from API response:', setCookies);
+
+      if (setCookies) {
+        setCookieToResponse(response, setCookies);
+      }
+
+      return response;
+    }
+
+    console.error('Error verifying refresh token:', err);
     return NextResponse.next();
   }
 }

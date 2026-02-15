@@ -1,53 +1,43 @@
 import AuthenticatedLinks from '@/app/components/navigation/AuthenticatedLinks';
 import UnauthenticatedLinks from '@/app/components/navigation/UnauthenticatedLinks';
 import NavLinkItem from '@/app/components/common/NavLinkItem';
-import {
-  createServerAxiosInstance,
-  getServerAccessTokenFromCookies,
-} from '@/app/lib/axios-server';
+import { createServerAxiosInstance } from '@/app/lib/axios-server';
 import { BASE_URL } from '@/constants/common';
+import { cookies } from 'next/headers';
 
 export default async function Navbar() {
-  const checkAuth = async () => {
+  const getAuthenticatedUser = async () => {
+    const cookieJar = await cookies();
+    const cookieHeader = cookieJar.toString();
+
+    const api = createServerAxiosInstance({
+      baseURL: BASE_URL,
+      cookieHeader,
+    });
+
     try {
-      const token = await getServerAccessTokenFromCookies();
-
-      if (token?.status !== 'success' || !token.accessToken) {
-        return false;
-      }
-
-      const api = createServerAxiosInstance({
-        baseURL: BASE_URL,
-        accessToken: token.accessToken,
-      });
-
-      const isAuthenticated = await api
-        .get<{ success: Boolean; isAuthenticated: boolean }>('/api/auth')
-        .then((res) => res.data.isAuthenticated)
-        .catch(() => null);
-
-      if (isAuthenticated) {
-        console.log('Authenticated:', isAuthenticated);
-        return true;
-      }
-
-      return false;
-    } catch (err) {
-      return false;
+      const response = await api.get('/api/auth');
+      return response.data;
+    } catch (error) {
+      console.error('Error checking authentication:', error);
+      return null;
     }
   };
 
-  const isAuthenticated = await checkAuth();
+  // const user = await getAuthenticatedUser();
+  // console.log('Navbar - Authenticated user:', user);
 
   return (
     <nav>
       <ul className="flex space-x-4">
+        {/* {user && <li className="text-green-500 font-bold">Welcome </li>} */}
+
         <NavLinkItem href="/">Home</NavLinkItem>
         <NavLinkItem href="/about">About</NavLinkItem>
         <NavLinkItem href="/contact">Contact</NavLinkItem>
         <NavLinkItem href="/room/join">Join Room</NavLinkItem>
 
-        {isAuthenticated ? <AuthenticatedLinks /> : <UnauthenticatedLinks />}
+        {/* {user?.success ? <AuthenticatedLinks /> : <UnauthenticatedLinks />} */}
       </ul>
     </nav>
   );

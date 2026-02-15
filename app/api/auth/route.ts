@@ -9,7 +9,6 @@ import { NextResponse } from 'next/server';
 
 /**
  * ? Logs in a user with the provided email and password.
- * ! We are using axios directly here to avoid interceptor loops.
  *
  * @param email
  * @param password
@@ -19,11 +18,7 @@ export async function POST(req: Request) {
   const api = createServerAxiosInstance({ baseURL: API_BASE_URL });
   const { email, password } = await req.json();
   try {
-    const apiResponse = await api.post(
-      '/auth',
-      { email, password },
-      { withCredentials: true }
-    );
+    const apiResponse = await api.post('/auth', { email, password });
 
     const cookieTokens = apiResponse.headers['set-cookie'];
     console.log('Received token cookies:', cookieTokens);
